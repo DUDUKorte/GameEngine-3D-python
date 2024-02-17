@@ -1,7 +1,19 @@
+import csv
 from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
+from ursina.editor.level_editor import LevelEditor, LevelEditorScene
 
 app = Ursina()
+#editor = LevelEditor()
+#my_scene = LevelEditorScene(0, 0, 'scene_01')
+#my_scene.path = './scenes/'
+
+#editor.disable()
+
+# Create sky atmosphere and fog density
+s = Sky()
+scene.fog_density = .03 # exponential fog density
+#scene.fog_density = (50, 200) # linear density fog
 
 
 for z in range(10):
@@ -41,39 +53,49 @@ class TextureBox(Button):
 class myPlayer(FirstPersonController):
     def __init__(self):
         super().__init__()
+        self.fall_after = 0 #cannot jump
 
-        myPlayer.fall_after = 0
-    
     def input(self, key):
-        if key == "left shift" == 1:
-            myPlayer.speed = lerp(player.speed, run_speed, 0.01)
-            print('jsdashfasd')
-        else:
-            myPlayer.speed = 5
-
+        if key == "left shift":
+            self.speed = lerp(self.speed, 10, 1)
+        elif key == "left shift up":
+            self.speed = 5
 
 TextureBox()
 
 player = myPlayer()
-#player = FirstPersonController()
-#player.fall_after = 0
-#player = Entity(model="cube", color=color.blue, scale_y=2)
 
-velocity = 0.01
-run_speed = 10
+def input(key):
+    global editor_mode
+
+    if key == 'l':
+        print('load scene')
+        my_scene.load()
+    elif key == 'k':
+        print('saving scene')
+        my_scene.save()
+
 
 def update():
     if held_keys["escape"] == 1:
         app.userExit()
 
-    
+def load_scene_00():
+    with open('scenes/untitled_scene[0,0].csv', newline='') as f:
+        spamreader = csv.reader(f, delimiter=';', quotechar=' ')
+        first = True
+        for row in spamreader:
+            if first:
+                first = False
+                continue
+            if row:
+                spawn_entity = Entity(position=row[1], model=row[2], shader=row[3], texture=row[4], collider=row[5], collider_type=row[6])
 
-    #player.x += held_keys["d"] * velocity
-    #player.x -= held_keys["a"] * velocity
-    #player.y += held_keys["w"] * velocity
-    #player.y -= held_keys["s"] * velocity
-#
-    #player.rotation_x += held_keys["r"] * 5
-    #player.rotation_y += held_keys["r"] * 5
+        # class;position;model;shader;texture;collider;collider_type
+        # WhiteCube;Vec3(0.73366, 0.583259, -7.32422e-05);'cube';'lit_with_shadows_shader';'white_cube';'box';'None'
+        #print(f'{scene}\n {type(scene)}'*80)
+
+    # Load
+    
 
 app.run()
